@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Exp</title>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	<script>
+		$(document).ready(function(){
+			getAllSyllabusItems();
+		})
+		
+		function getAllSyllabusItems()
+		{
+			let syllabusItems = [];
+			$.ajax({
+				type: "GET",
+	    		url: "DisplaySyllabusItems.php",
+	    		datatype: "text",
+	    		success: function(response)
+				{
+					syllabusItems = JSON.parse(response);
+					console.log(syllabusItems);
+					reRender(syllabusItems);
+					deleteSyllabus(syllabusItems[0]);
+				},
+			});
+		}
+			
+		function reRender(syllabusItems)
+		{
+			$("body").html("");
+			let index = 0;
+			let counter = 1;
+			for(const syllabusItem of syllabusItems)
+			{
+				var syllabusContent = createCard(index, syllabusItem, counter);
+				$("body").append(syllabusContent);
+				counter++;
+				index++;
+			}
+		}
+	
+		function createCard(index, syllabusItem, counter)
+		{
+			let syllabusCard = `<div>
+									<div>${counter}</div>
+									<div>
+										<label><b>${syllabusItem["title"]}</b></label><br>
+										<label>${ syllabusItem["description"]}</label>
+										<br><br>
+									</div>
+								</div>`;
+			return(syllabusCard);
+		}
+				
+		function deleteSyllabus(syllabusItem)
+		{
+			const syllabusNumber = syllabusItem.SyllabusID;
+			const obj = {syllabusNumber: syllabusNumber};
+			$.ajax(
+			{
+				method: "DELETE",
+				url: "DeleteSyllabus.php",
+				data: JSON.stringify(obj),
+				success: function(data, textStatus, xhr)
+				{
+					let syllabusItems = [];
+					$.ajax(
+					{
+						type: "GET",
+						url: "DisplaySyllabusItems.php",
+						datatype: "text",
+						success: function(response)
+						{
+							syllabusItems = JSON.parse(response);
+							console.log(syllabusItems);
+							reRender(syllabusItems);
+						},
+					});
+				},
+			});
+		}
+</script>
+</head>
+<body>
+</body>
+</html>
